@@ -3,17 +3,23 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    restart: unless-stopped
     ports:
       - 192.168.1.231:9090:9090
     command:
     - --config.file=/etc/prometheus/prometheus.yml
+    expose:
+      - 9090
     volumes:
     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    depends_on:
-    - cadvisor
+    links:
+      - cadvisor:cadvisor
+      - node_exporter:node_exporter
+
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
+    restart: unless-stopped
     ports:
       - 192.168.1.231:8080:8080
     volumes:
@@ -23,8 +29,25 @@ services:
     - /var/lib/docker/:/var/lib/docker:ro
     depends_on:
     - redis
+    expose:
+      - 8080
+
   redis:
     image: redis:latest
     container_name: redis
+    restart: unless-stopped
     ports:
       - 192.168.1.231:6379:6379
+    expose:
+      - 6379
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command:
+      - '--path.rootfs=/host'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
