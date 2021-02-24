@@ -12,4 +12,4 @@ scrape_configs:
   - job_name: 'node'
     scrape_interval: 15s
     static_configs:
-      - targets: ['192.168.1.231:9100']
+      - targets: ['prometheus.rsletten.com:9100', 'libvirt.rsletten.com:9100', 'zerocool.rsletten.com:9100']
